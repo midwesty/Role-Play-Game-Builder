@@ -1,0 +1,104 @@
+{
+  "locations": [
+    {
+      "id": "loc001",
+      "name": "The Abandoned Wharf",
+      "sensory": "Cold fog rolling over splintered boards; the smell of brine and diesel.",
+      "danger": "Medium",
+      "cluePresent": true,
+      "description": "Old fishing boats rot along the docks. Locals whisper about lights flickering beneath the waves.",
+      "portrait": "001.jpg",
+      "tags": ["waterfront", "fog", "abandoned"]
+    },
+    {
+      "id": "loc002",
+      "name": "Northline Railway Tunnels",
+      "sensory": "Dripping water echoing through endless concrete; distant metallic clanks.",
+      "danger": "High",
+      "cluePresent": false,
+      "description": "A decommissioned transit line now sealed from the public. Something still moves deep inside.",
+      "portrait": "002.jpg",
+      "tags": ["underground", "industrial", "dangerous"]
+    },
+    {
+      "id": "loc003",
+      "name": "The Hollow Pines Motel",
+      "sensory": "Buzzing neon; moldy carpet; televisions that switch on by themselves.",
+      "danger": "Medium",
+      "cluePresent": true,
+      "description": "A decaying roadside motel where guests often check in but rarely stay the night.",
+      "portrait": "003.jpg",
+      "tags": ["motel", "noir", "creepy"]
+    },
+    {
+      "id": "loc004",
+      "name": "Ward & Latch Funeral Home",
+      "sensory": "Soft organ hum; cold marble; faint scent of wilted flowers.",
+      "danger": "Low",
+      "cluePresent": false,
+      "description": "Recently shut down after rumors of strange activity during embalming hours.",
+      "portrait": "004.jpg",
+      "tags": ["funeral", "silence", "unsettling"]
+    },
+    {
+      "id": "loc005",
+      "name": "Red Harbor Chemical Plant",
+      "sensory": "Sour chemical stink; echoing pipes; dripping pink runoff.",
+      "danger": "High",
+      "cluePresent": true,
+      "description": "An old industrial plant abandoned after a mysterious accident. Security has been removed, but locals avoid the place.",
+      "portrait": "005.jpg",
+      "tags": ["factory", "hazardous", "polluted"]
+    },
+    {
+      "id": "loc006",
+      "name": "Ashmoor Library Basement",
+      "sensory": "Dusty tomes; cold air drafts; the quiet rustle of unseen pages.",
+      "danger": "Medium",
+      "cluePresent": true,
+      "description": "The library’s basement archives hold documents that no one claims responsibility for.",
+      "portrait": "006.jpg",
+      "tags": ["library", "archives", "mystery"]
+    },
+    {
+      "id": "loc007",
+      "name": "The Broken Observatory",
+      "sensory": "Crunching shattered glass; owl calls; warped metal groaning in the wind.",
+      "danger": "Low",
+      "cluePresent": false,
+      "description": "Once used for meteorological research. Now a ruin surrounded by inexplicable electromagnetic events.",
+      "portrait": "007.jpg",
+      "tags": ["scientific", "astronomy", "ruins"]
+    },
+    {
+      "id": "loc008",
+      "name": "Penance Hill Cemetery",
+      "sensory": "Wet soil; rustling dead leaves; distant bells.",
+      "danger": "Medium",
+      "cluePresent": true,
+      "description": "A sprawling hillside cemetery where fresh graves sometimes appear overnight.",
+      "portrait": "008.jpg",
+      "tags": ["graveyard", "night", "supernatural"]
+    },
+    {
+      "id": "loc009",
+      "name": "Southmoor Police Station – Evidence Wing",
+      "sensory": "Flickering fluorescent lights; stale coffee; locked cabinets rattling by themselves.",
+      "danger": "Low",
+      "cluePresent": true,
+      "description": "Files have gone missing recently. Officers refuse to discuss the matter.",
+      "portrait": "009.jpg",
+      "tags": ["police", "official", "tense"]
+    },
+    {
+      "id": "loc010",
+      "name": "The Lantern Street Market (After Hours)",
+      "sensory": "Scattered trash blowing in the wind; stray cats; metallic echoes.",
+      "danger": "Medium",
+      "cluePresent": false,
+      "description": "An open-air bazaar during the day, but after midnight strange vendors appear with impossible wares.",
+      "portrait": "010.jpg",
+      "tags": ["market", "night", "weird"]
+    }
+  ]
+}

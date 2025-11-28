@@ -1,0 +1,104 @@
+{
+  "npcs": [
+    {
+      "id": "npc001",
+      "name": "Dr. Helena Crowe",
+      "secret": "She has been experimenting on herself.",
+      "motivation": "To prove her theories on extradimensional biology.",
+      "personality": "Cold, analytical, unnervingly calm.",
+      "bio": "A celebrated surgeon whose recent behavior has become detached from reality.",
+      "portrait": "portraits/001.jpg",
+      "tags": ["scientist", "obsessed", "unnerving"]
+    },
+    {
+      "id": "npc002",
+      "name": "Jonas Merrick",
+      "secret": "He witnessed a ritual in the woods as a child.",
+      "motivation": "To prevent it from happening again.",
+      "personality": "Jumpy, paranoid, chain-smoker.",
+      "bio": "A local mechanic with a thousand-yard stare.",
+      "portrait": "portraits/002.jpg",
+      "tags": ["townsfolk", "paranoid"]
+    },
+    {
+      "id": "npc003",
+      "name": "Marigold Finch",
+      "secret": "Knows she is losing time—waking up in new places.",
+      "motivation": "To understand what’s controlling her.",
+      "personality": "Kind, dreamy, frightened beneath the surface.",
+      "bio": "The town librarian with cryptic blackout episodes.",
+      "portrait": "portraits/003.jpg",
+      "tags": ["librarian", "possessed"]
+    },
+    {
+      "id": "npc004",
+      "name": "Deputy Mason Rourke",
+      "secret": "Is covering up evidence of a creature sighting.",
+      "motivation": "To protect the town from panic.",
+      "personality": "Stoic, protective, stubborn.",
+      "bio": "A loyal lawman who has seen too much.",
+      "portrait": "portraits/004.jpg",
+      "tags": ["lawman", "protector"]
+    },
+    {
+      "id": "npc005",
+      "name": "Sister Abigail Holt",
+      "secret": "Her visions may not be divine.",
+      "motivation": "To follow what she believes is a holy command.",
+      "personality": "Serene, unsettlingly confident.",
+      "bio": "A nun who claims to speak with angels.",
+      "portrait": "portraits/005.jpg",
+      "tags": ["religious", "prophet"]
+    },
+    {
+      "id": "npc006",
+      "name": "Elias Brine",
+      "secret": "Knows the true name of the entity haunting the woods.",
+      "motivation": "To avoid being found by it.",
+      "personality": "Reclusive, muttering, brilliant.",
+      "bio": "Once a professor—now a paranoid hermit.",
+      "portrait": "portraits/006.jpg",
+      "tags": ["scholar", "hermit"]
+    },
+    {
+      "id": "npc007",
+      "name": "Vivienne Sable",
+      "secret": "She’s been dead for three days, though she doesn’t know it.",
+      "motivation": "To find out why no one seems to notice.",
+      "personality": "Charming, aloof, oddly cold.",
+      "bio": "A socialite whose reality is thin around the edges.",
+      "portrait": "portraits/007.jpg",
+      "tags": ["ghost", "socialite"]
+    },
+    {
+      "id": "npc008",
+      "name": "Harold Pike",
+      "secret": "He’s been dreaming events before they happen.",
+      "motivation": "To prevent one specific dream from coming true.",
+      "personality": "Timid, honest, overwhelmed.",
+      "bio": "A humble mailman with prophetic nightmares.",
+      "portrait": "portraits/008.jpg",
+      "tags": ["prophetic", "townsfolk"]
+    },
+    {
+      "id": "npc009",
+      "name": "Selene Ward",
+      "secret": "She is possessed by a second consciousness.",
+      "motivation": "To keep the other mind from taking full control.",
+      "personality": "Dry humor, distracted, guarded.",
+      "bio": "A college student battling an unseen intruder in her mind.",
+      "portrait": "portraits/009.jpg",
+      "tags": ["student", "possessed"]
+    },
+    {
+      "id": "npc010",
+      "name": "Captain Rowan Fisk",
+      "secret": "Smuggles occult artifacts for wealthy collectors.",
+      "motivation": "To make enough money to disappear.",
+      "personality": "Gruff, calculating, confident.",
+      "bio": "A salvage ship captain with a dangerous side hustle.",
+      "portrait": "portraits/010.jpg",
+      "tags": ["sailor", "smuggler"]
+    }
+  ]
+}

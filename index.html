@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ScenarioSmith</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ========================================================= -->
+  <!--                         TOP NAV BAR                        -->
+  <!-- ========================================================= -->
+  <header id="topNav">
+    <div id="appTitle">ScenarioSmith</div>
+
+    <button id="btnNew">New</button>
+
+    <select id="scenarioLoadSelect"></select>
+
+    <button id="btnSave">Save</button>
+    <button id="btnUndo">↺ Undo</button>
+    <button id="btnRedo">↻ Redo</button>
+
+    <!-- Manager Buttons (Left Side Only — as requested) -->
+    <button onclick="openNPCPanel()">NPC Manager</button>
+    <button onclick="openLocPanel()">Location Manager</button>
+
+    <!-- Right-side feature buttons injected by JS:
+         - Threat Generator
+         - Player Export -->
+  </header>
+
+
+
+  <!-- ========================================================= -->
+  <!--                 MAIN CONTENT + FIXED HUD                  -->
+  <!-- ========================================================= -->
+  <div id="mainContainer">
+
+    <!-- ========================================================= -->
+    <!--                   SCROLLABLE FORM AREA                    -->
+    <!-- ========================================================= -->
+    <main id="formArea">
+
+      <!-- CORE HOOK -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">1. Core Hook</h2>
+        <textarea id="hookInput" class="textArea"></textarea>
+      </section>
+
+      <!-- TRUTH -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">2. Truth Beneath</h2>
+        <textarea id="truthInput" class="textArea"></textarea>
+      </section>
+
+      <!-- THREE ACT SPINE -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">3. Three Act Spine</h2>
+
+        <label>Act I – Discovery</label>
+        <textarea id="act1Input" class="textArea"></textarea>
+
+        <label>Act II – Descent</label>
+        <textarea id="act2Input" class="textArea"></textarea>
+
+        <label>Act III – Climax / Escape</label>
+        <textarea id="act3Input" class="textArea"></textarea>
+      </section>
+
+      <!-- NPC TRIANGLE -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">4. NPC Triangle</h2>
+
+        <div class="npcRow">
+          <label>Ally</label>
+          <select id="npcAllySelect" class="npcSelect"></select>
+        </div>
+
+        <div class="npcRow">
+          <label>Antagonist</label>
+          <select id="npcAntagSelect" class="npcSelect"></select>
+        </div>
+
+        <div class="npcRow">
+          <label>Victim / Wildcard</label>
+          <select id="npcWildSelect" class="npcSelect"></select>
+        </div>
+      </section>
+
+      <!-- LOCATIONS -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">5. Key Locations</h2>
+
+        <div class="locationRow">1. <select id="loc_0" class="locSelect"></select></div>
+        <div class="locationRow">2. <select id="loc_1" class="locSelect"></select></div>
+        <div class="locationRow">3. <select id="loc_2" class="locSelect"></select></div>
+        <div class="locationRow">4. <select id="loc_3" class="locSelect"></select></div>
+        <div class="locationRow">5. <select id="loc_4" class="locSelect"></select></div>
+      </section>
+
+      <!-- CLUES -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">6. Clues</h2>
+        <input id="clue_0" class="clueInput" type="text" />
+        <input id="clue_1" class="clueInput" type="text" />
+        <input id="clue_2" class="clueInput" type="text" />
+      </section>
+
+      <!-- TONE -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">7. Tone Filter</h2>
+
+        <label><input type="checkbox" class="toneChk" value="Cosmic Horror" /> Cosmic Horror</label>
+        <label><input type="checkbox" class="toneChk" value="Folk Horror" /> Folk Horror</label>
+        <label><input type="checkbox" class="toneChk" value="Surreal Mystery" /> Surreal Mystery</label>
+        <label><input type="checkbox" class="toneChk" value="Noir" /> Noir</label>
+        <label><input type="checkbox" class="toneChk" value="Psychological" /> Psychological</label>
+        <label><input type="checkbox" class="toneChk" value="Other" /> Other</label>
+      </section>
+
+      <!-- PACING -->
+      <section class="sectionBlock">
+        <h2 class="sectionHeader">8. Pacing Notes</h2>
+        <textarea id="pacingInput" class="textArea"></textarea>
+      </section>
+
+    </main>
+
+
+
+    <!-- ========================================================= -->
+    <!--                        FIXED HUD                          -->
+    <!-- ========================================================= -->
+    <div id="hud">
+
+      <div id="hudResizeHandle"></div>
+      <div id="hudToggle">▼ Scenario Dashboard</div>
+
+      <div id="hudInner">
+
+        <div class="hudRow">
+          <span class="hudLabel">Hook:</span>
+          <span id="hudHook">—</span>
+        </div>
+
+        <div class="hudRow">
+          <span class="hudLabel">Truth:</span>
+          <span id="hudTruth">—</span>
+        </div>
+
+        <div class="hudRow">
+          <span class="hudLabel">NPCs:</span>
+          <div id="hudNPCs" class="hudCardRow"></div>
+        </div>
+
+        <div class="hudRow">
+          <span class="hudLabel">Locations:</span>
+          <div id="hudLocations" class="hudCardRow"></div>
+        </div>
+
+        <div class="hudRow">
+          <span class="hudLabel">Clues:</span>
+          <div id="hudClues" class="hudClueRow"></div>
+        </div>
+
+        <div class="hudRow">
+          <span class="hudLabel">Tone:</span>
+          <span id="hudTone">None</span>
+        </div>
+
+      </div>
+    </div>
+  </div> <!-- END mainContainer -->
+
+
+
+  <!-- ========================================================= -->
+  <!--                      NPC EDITOR POPUP                      -->
+  <!-- ========================================================= -->
+  <div id="npcCard" class="popupOverlay">
+    <div class="popupCard"></div>
+  </div>
+
+
+
+  <!-- ========================================================= -->
+  <!--                   LOCATION EDITOR POPUP                    -->
+  <!-- ========================================================= -->
+  <div id="locationCard" class="popupOverlay">
+    <div class="popupCard"></div>
+  </div>
+
+
+
+  <!-- ========================================================= -->
+  <!--                 SLIDE-IN PANELS (HTML VERSION)            -->
+  <!-- ========================================================= -->
+  <div id="slidePanelNPC" class="slidePanel">
+    <div class="slidePanelHeader">
+      <span>NPC Manager</span>
+      <button onclick="closeNPCPanel()">✖</button>
+    </div>
+    <div class="slidePanelContent">
+      <button onclick="newNPC()">+ New NPC</button>
+      <button onclick="randomNPC()">🎲 Random NPC</button>
+      <div id="npcList"></div>
+    </div>
+  </div>
+
+  <div id="slidePanelLoc" class="slidePanel">
+    <div class="slidePanelHeader">
+      <span>Location Manager</span>
+      <button onclick="closeLocPanel()">✖</button>
+    </div>
+    <div class="slidePanelContent">
+      <button onclick="newLocation()">+ New Location</button>
+      <div id="locList"></div>
+    </div>
+  </div>
+
+
+  <!-- JS -->
+  <script src="script.js"></script>
+</body>
+</html>
