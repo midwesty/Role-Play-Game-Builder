@@ -7,7 +7,7 @@
       "danger": "Medium",
       "cluePresent": true,
       "description": "Old fishing boats rot along the docks. Locals whisper about lights flickering beneath the waves.",
-      "portrait": "001.jpg",
+      "portrait": "locations/001.jpg",
       "tags": ["waterfront", "fog", "abandoned"]
     },
     {
@@ -17,7 +17,7 @@
       "danger": "High",
       "cluePresent": false,
       "description": "A decommissioned transit line now sealed from the public. Something still moves deep inside.",
-      "portrait": "002.jpg",
+      "portrait": "locations/002.jpg",
       "tags": ["underground", "industrial", "dangerous"]
     },
     {
@@ -27,7 +27,7 @@
       "danger": "Medium",
       "cluePresent": true,
       "description": "A decaying roadside motel where guests often check in but rarely stay the night.",
-      "portrait": "003.jpg",
+      "portrait": "locations/003.jpg",
       "tags": ["motel", "noir", "creepy"]
     },
     {
@@ -37,7 +37,7 @@
       "danger": "Low",
       "cluePresent": false,
       "description": "Recently shut down after rumors of strange activity during embalming hours.",
-      "portrait": "004.jpg",
+      "portrait": "locations/004.jpg",
       "tags": ["funeral", "silence", "unsettling"]
     },
     {
@@ -47,7 +47,7 @@
       "danger": "High",
       "cluePresent": true,
       "description": "An old industrial plant abandoned after a mysterious accident. Security has been removed, but locals avoid the place.",
-      "portrait": "005.jpg",
+      "portrait": "locations/005.jpg",
       "tags": ["factory", "hazardous", "polluted"]
     },
     {
@@ -57,7 +57,7 @@
       "danger": "Medium",
       "cluePresent": true,
       "description": "The library’s basement archives hold documents that no one claims responsibility for.",
-      "portrait": "006.jpg",
+      "portrait": "locations/006.jpg",
       "tags": ["library", "archives", "mystery"]
     },
     {
@@ -67,7 +67,7 @@
       "danger": "Low",
       "cluePresent": false,
       "description": "Once used for meteorological research. Now a ruin surrounded by inexplicable electromagnetic events.",
-      "portrait": "007.jpg",
+      "portrait": "locations/007.jpg",
       "tags": ["scientific", "astronomy", "ruins"]
     },
     {
@@ -77,7 +77,7 @@
       "danger": "Medium",
       "cluePresent": true,
       "description": "A sprawling hillside cemetery where fresh graves sometimes appear overnight.",
-      "portrait": "008.jpg",
+      "portrait": "locations/008.jpg",
       "tags": ["graveyard", "night", "supernatural"]
     },
     {
@@ -87,7 +87,7 @@
       "danger": "Low",
       "cluePresent": true,
       "description": "Files have gone missing recently. Officers refuse to discuss the matter.",
-      "portrait": "009.jpg",
+      "portrait": "locations/009.jpg",
       "tags": ["police", "official", "tense"]
     },
     {
@@ -97,7 +97,7 @@
       "danger": "Medium",
       "cluePresent": false,
       "description": "An open-air bazaar during the day, but after midnight strange vendors appear with impossible wares.",
-      "portrait": "010.jpg",
+      "portrait": "locations/010.jpg",
       "tags": ["market", "night", "weird"]
     }
   ]
