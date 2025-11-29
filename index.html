@@ -22,24 +22,23 @@
     <button id="btnUndo">↺ Undo</button>
     <button id="btnRedo">↻ Redo</button>
 
-    <!-- Manager Buttons (Left Side Only — as requested) -->
+    <!-- Manager Buttons -->
     <button onclick="openNPCPanel()">NPC Manager</button>
     <button onclick="openLocPanel()">Location Manager</button>
 
-    <!-- Right-side feature buttons injected by JS:
-         - Threat Generator
-         - Player Export -->
+    <!-- JS will inject: Threat Generator, Player Export -->
   </header>
 
 
 
+
   <!-- ========================================================= -->
-  <!--                 MAIN CONTENT + FIXED HUD                  -->
+  <!--                 MAIN AREA + FIXED HUD                     -->
   <!-- ========================================================= -->
   <div id="mainContainer">
 
     <!-- ========================================================= -->
-    <!--                   SCROLLABLE FORM AREA                    -->
+    <!--                      FORM AREA                            -->
     <!-- ========================================================= -->
     <main id="formArea">
 
@@ -55,7 +54,7 @@
         <textarea id="truthInput" class="textArea"></textarea>
       </section>
 
-      <!-- THREE ACT SPINE -->
+      <!-- ACT STRUCTURE -->
       <section class="sectionBlock">
         <h2 class="sectionHeader">3. Three Act Spine</h2>
 
@@ -74,17 +73,17 @@
         <h2 class="sectionHeader">4. NPC Triangle</h2>
 
         <div class="npcRow">
-          <label>Ally</label>
+          <label>Ally:</label>
           <select id="npcAllySelect" class="npcSelect"></select>
         </div>
 
         <div class="npcRow">
-          <label>Antagonist</label>
+          <label>Antagonist:</label>
           <select id="npcAntagSelect" class="npcSelect"></select>
         </div>
 
         <div class="npcRow">
-          <label>Victim / Wildcard</label>
+          <label>Victim / Wildcard:</label>
           <select id="npcWildSelect" class="npcSelect"></select>
         </div>
       </section>
@@ -131,7 +130,7 @@
 
 
     <!-- ========================================================= -->
-    <!--                        FIXED HUD                          -->
+    <!--                          HUD                               -->
     <!-- ========================================================= -->
     <div id="hud">
 
@@ -176,8 +175,9 @@
 
 
 
+
   <!-- ========================================================= -->
-  <!--                      NPC EDITOR POPUP                      -->
+  <!--                        NPC POPUP                           -->
   <!-- ========================================================= -->
   <div id="npcCard" class="popupOverlay">
     <div class="popupCard"></div>
@@ -186,7 +186,7 @@
 
 
   <!-- ========================================================= -->
-  <!--                   LOCATION EDITOR POPUP                    -->
+  <!--                     LOCATION POPUP                         -->
   <!-- ========================================================= -->
   <div id="locationCard" class="popupOverlay">
     <div class="popupCard"></div>
@@ -194,34 +194,62 @@
 
 
 
+
+
   <!-- ========================================================= -->
-  <!--                 SLIDE-IN PANELS (HTML VERSION)            -->
+  <!--                   SLIDE-IN PANELS                          -->
   <!-- ========================================================= -->
+
+  <!-- NPC MANAGER -->
   <div id="slidePanelNPC" class="slidePanel">
     <div class="slidePanelHeader">
       <span>NPC Manager</span>
       <button onclick="closeNPCPanel()">✖</button>
     </div>
     <div class="slidePanelContent">
-      <button onclick="newNPC()">+ New NPC</button>
-      <button onclick="randomNPC()">🎲 Random NPC</button>
+
+      <!-- These buttons match JS v3.2 exactly -->
+      <button onclick="newNPC()" style="width:100%;padding:8px;margin-bottom:10px;">
+        ➕ New NPC
+      </button>
+
+      <button onclick="randomNPC()" style="width:100%;padding:8px;margin-bottom:20px;">
+        🎲 Random NPC
+      </button>
+
       <div id="npcList"></div>
+
     </div>
   </div>
 
+
+  <!-- LOCATION MANAGER -->
   <div id="slidePanelLoc" class="slidePanel">
     <div class="slidePanelHeader">
       <span>Location Manager</span>
       <button onclick="closeLocPanel()">✖</button>
     </div>
     <div class="slidePanelContent">
-      <button onclick="newLocation()">+ New Location</button>
+
+      <button onclick="newLocation()" style="width:100%;padding:8px;margin-bottom:10px;">
+        ➕ New Location
+      </button>
+
+      <!-- Missing in your old HTML — required for v3.2 -->
+      <button onclick="randomLocation()" style="width:100%;padding:8px;margin-bottom:20px;">
+        🎲 Random Location
+      </button>
+
       <div id="locList"></div>
+
     </div>
   </div>
 
 
-  <!-- JS -->
+
+  <!-- ========================================================= -->
+  <!--                          JS                                -->
+  <!-- ========================================================= -->
   <script src="script.js"></script>
 </body>
 </html>
