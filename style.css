@@ -55,20 +55,19 @@ textarea, input, select {
 
 
 /* ============================================================
-   FORM AREA (scrollable above HUD)
+   FORM AREA
    ============================================================ */
 #formArea {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  padding-bottom: 350px; /* Space for HUD */
+  padding-bottom: 350px; /* space for HUD */
 }
 
 
 /* ============================================================
    FORM BLOCKS
    ============================================================ */
-
 .sectionBlock {
   background: #fff;
   border-radius: 8px;
@@ -100,9 +99,8 @@ textarea, input, select {
 }
 
 
-
 /* ============================================================
-   FIXED HUD (GM Dashboard)
+   HUD (GM Dashboard)
    ============================================================ */
 #hud {
   position: fixed;
@@ -110,12 +108,7 @@ textarea, input, select {
   left: 0;
   width: 100%;
   height: 260px;
-
-  /* UPDATED — Now loads from GitHub folders, not Imgur */
-  background: #1a1c1f url("locations/hud.png");
-
-  background-size: cover;
-  background-blend-mode: multiply;
+  background: #1a1c1f;
   color: #e8e8e8;
   box-shadow: 0 -3px 8px rgba(0,0,0,0.4);
   border-top: 2px solid #000;
@@ -149,7 +142,7 @@ textarea, input, select {
 }
 
 
-/* HUD Inner Content */
+/* HUD Inner */
 #hudInner {
   flex: 1;
   overflow-y: auto;
@@ -168,8 +161,6 @@ textarea, input, select {
   min-width: 95px;
 }
 
-
-/* Mini-card Rows */
 .hudCardRow {
   display: flex;
   flex-wrap: nowrap;
@@ -179,7 +170,7 @@ textarea, input, select {
 
 
 /* ============================================================
-   MINI CARDS (HUD NPC/Location Cards)
+   MINI CARDS
    ============================================================ */
 .miniCard {
   width: 120px;
@@ -190,7 +181,6 @@ textarea, input, select {
   text-align: center;
   user-select: none;
   cursor: pointer;
-  backdrop-filter: blur(2px);
   transition: 0.15s ease;
 }
 
@@ -212,12 +202,10 @@ textarea, input, select {
   font-weight: bold;
 }
 
-.placeholderCard {
-  opacity: 0.4;
-}
 
-
-/* Clue badges */
+/* ============================================================
+   CLUE CHIPS
+   ============================================================ */
 .hudClueRow {
   display: flex;
   gap: 8px;
@@ -231,7 +219,6 @@ textarea, input, select {
   border: 1px solid #444;
   font-size: 12px;
 }
-
 
 
 /* ============================================================
@@ -274,9 +261,8 @@ textarea, input, select {
 }
 
 
-
 /* ============================================================
-   SLIDE-IN PANELS (Managers)
+   SLIDE-IN MANAGERS
    ============================================================ */
 .slidePanel {
   position: fixed;
@@ -306,14 +292,6 @@ textarea, input, select {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.slidePanelHeader button {
-  background: #444;
-  color: #eee;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
 }
 
 .slidePanelContent {

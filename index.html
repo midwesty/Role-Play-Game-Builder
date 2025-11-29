@@ -26,7 +26,9 @@
     <button onclick="openNPCPanel()">NPC Manager</button>
     <button onclick="openLocPanel()">Location Manager</button>
 
-    <!-- JS will inject: Threat Generator, Player Export -->
+    <!-- JS Injects:
+         - Threat Generator
+         - Player Export -->
   </header>
 
 
@@ -129,6 +131,7 @@
 
 
 
+
     <!-- ========================================================= -->
     <!--                          HUD                               -->
     <!-- ========================================================= -->
@@ -171,7 +174,9 @@
 
       </div>
     </div>
+
   </div> <!-- END mainContainer -->
+
 
 
 
@@ -195,7 +200,6 @@
 
 
 
-
   <!-- ========================================================= -->
   <!--                   SLIDE-IN PANELS                          -->
   <!-- ========================================================= -->
@@ -207,18 +211,7 @@
       <button onclick="closeNPCPanel()">✖</button>
     </div>
     <div class="slidePanelContent">
-
-      <!-- These buttons match JS v3.2 exactly -->
-      <button onclick="newNPC()" style="width:100%;padding:8px;margin-bottom:10px;">
-        ➕ New NPC
-      </button>
-
-      <button onclick="randomNPC()" style="width:100%;padding:8px;margin-bottom:20px;">
-        🎲 Random NPC
-      </button>
-
       <div id="npcList"></div>
-
     </div>
   </div>
 
@@ -230,20 +223,10 @@
       <button onclick="closeLocPanel()">✖</button>
     </div>
     <div class="slidePanelContent">
-
-      <button onclick="newLocation()" style="width:100%;padding:8px;margin-bottom:10px;">
-        ➕ New Location
-      </button>
-
-      <!-- Missing in your old HTML — required for v3.2 -->
-      <button onclick="randomLocation()" style="width:100%;padding:8px;margin-bottom:20px;">
-        🎲 Random Location
-      </button>
-
       <div id="locList"></div>
-
     </div>
   </div>
+
 
 
 
@@ -251,5 +234,6 @@
   <!--                          JS                                -->
   <!-- ========================================================= -->
   <script src="script.js"></script>
+
 </body>
 </html>
