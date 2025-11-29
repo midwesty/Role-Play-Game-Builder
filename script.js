@@ -406,7 +406,6 @@ function refreshHUD() {
 }
 
 
-/* HUD NPC Mini-Card */
 function hudNPCminiCard(id) {
     const area = document.getElementById("hudNPCs");
     const div = document.createElement("div");
@@ -440,7 +439,6 @@ function hudNPCminiCard(id) {
 }
 
 
-/* HUD Location Mini-Card */
 function hudLocationMiniCard(id) {
     const area = document.getElementById("hudLocations");
     const div = document.createElement("div");
@@ -484,13 +482,11 @@ function openNpcEditor(id) {
 
     const npc = state.npcs[id];
 
-    // Build portrait left / fields right layout
     const box = document.querySelector("#npcCard .popupCard");
     box.innerHTML = `
         <h2>Edit NPC</h2>
 
         <div style="display:flex; gap:10px;">
-            <!-- Portrait Column -->
             <div style="width:150px; flex-shrink:0;">
                 <div id="npcPortraitBox"
                      style="width:150px;height:150px;
@@ -506,7 +502,6 @@ function openNpcEditor(id) {
                         style="margin-top:5px;width:100%;">⬆ Upload Portrait</button>
             </div>
 
-            <!-- Fields -->
             <div style="flex:1;">
                 <label>Name:</label>
                 <input id="npcName" class="popupInput" type="text" value="${npc.name || ""}"/>
@@ -539,13 +534,10 @@ function openNpcEditor(id) {
 }
 
 function randomizeNPCPortrait() {
-    const portraitList = [
-        "https://i.imgur.com/2VtQwSd.jpeg",
-        "https://i.imgur.com/Rqf9pKd.jpeg",
-        "https://i.imgur.com/8e47Ntc.jpeg",
-        "https://i.imgur.com/Ep7oV2X.jpeg",
-        "https://i.imgur.com/hu1khjv.jpeg"
-    ];
+    const portraitList = [];
+    for (let i = 1; i <= 15; i++) {
+        portraitList.push(`portraits/${String(i).padStart(3, "0")}.jpg`);
+    }
 
     const url = portraitList[Math.floor(Math.random()*portraitList.length)];
     const npc = state.npcs[currentNPC];
@@ -567,7 +559,7 @@ function uploadNPCPortrait() {
         const reader = new FileReader();
         reader.onload = e => {
             const npc = state.npcs[currentNPC];
-            npc.portrait = e.target.result; // Base64 saved
+            npc.portrait = e.target.result;
             document.getElementById("npcPortraitBox").style.backgroundImage =
                 `url('${npc.portrait}')`;
             saveAllToStorage();
@@ -631,11 +623,11 @@ function randomNPC() {
     const secrets = ["Owes a cult money", "Is not human", "Knows forbidden lore"];
     const motives = ["Seeking power", "Protecting someone", "Running from guilt"];
     const traits = ["Quiet", "Clever", "Anxious", "Flirty", "Stoic"];
-    const portraits = [
-        "https://i.imgur.com/2VtQwSd.jpeg",
-        "https://i.imgur.com/Rqf9pKd.jpeg",
-        "https://i.imgur.com/8e47Ntc.jpeg"
-    ];
+
+    const portraits = [];
+    for (let i = 1; i <= 15; i++) {
+        portraits.push(`portraits/${String(i).padStart(3, "0")}.jpg`);
+    }
 
     const id = crypto.randomUUID();
     state.npcs[id] = {
@@ -680,7 +672,6 @@ function openLocationEditor(id) {
         <h2>Edit Location</h2>
 
         <div style="display:flex; gap:10px;">
-            <!-- Portrait -->
             <div style="width:150px; flex-shrink:0;">
                 <div id="locPortraitBox"
                      style="width:150px;height:150px;
@@ -733,11 +724,10 @@ function openLocationEditor(id) {
 
 
 function randomizeLocationPortrait() {
-    const portraitList = [
-        "https://i.imgur.com/P0N9oAN.jpeg",
-        "https://i.imgur.com/rZXaQ0m.jpeg",
-        "https://i.imgur.com/EBc46Ui.jpeg"
-    ];
+    const portraitList = [];
+    for (let i = 1; i <= 10; i++) {
+        portraitList.push(`locations/${String(i).padStart(3, "0")}.jpg`);
+    }
 
     const url = portraitList[Math.floor(Math.random()*portraitList.length)];
     const loc = state.locations[currentLocation];
@@ -827,7 +817,6 @@ function deleteLocation(id) {
    SLIDE-IN PANELS (NPC / LOCATION MANAGER)
    ===================================================================== */
 
-/* REMOVE DUPLICATE NAV BUTTONS — only keep HTML ones */
 function initSlidePanels() {
     refreshNPCList();
     refreshLocationList();
@@ -852,9 +841,7 @@ function closeLocPanel() {
 }
 
 
-/* -----------------------------------------------------------------
-   NPC LIST WITH SEARCH + FILTERS
-   ----------------------------------------------------------------- */
+
 function refreshNPCList() {
     const box = document.getElementById("npcList");
     box.innerHTML = `
@@ -899,9 +886,7 @@ function refreshNPCList() {
 }
 
 
-/* -----------------------------------------------------------------
-   LOCATION LIST WITH SEARCH + FILTERS
-   ----------------------------------------------------------------- */
+
 function refreshLocationList() {
     const box = document.getElementById("locList");
     box.innerHTML = `
@@ -963,10 +948,9 @@ function generateThreat() {
         "Its arrival heralds a storm.",
         "A villager unknowingly summoned it."
     ];
-    const portraits = [
-        "https://i.imgur.com/mK8xYGb.jpeg",
-        "https://i.imgur.com/CuWsDXL.jpeg"
-    ];
+
+    // Removed broken Imgur portraits – using a local fallback
+    const portraits = ["portraits/001.jpg"];
 
     alert(
         "=== Threat Generated ===\n\n" +
@@ -1061,4 +1045,3 @@ document.getElementById("hudToggle").onclick = () => {
    END
    ===================================================================== */
 console.log("ScenarioSmith v3.0 JS Loaded");
-

@@ -110,7 +110,10 @@ textarea, input, select {
   left: 0;
   width: 100%;
   height: 260px;
-  background: #1a1c1f url("https://i.imgur.com/OVQ7eEI.png");
+
+  /* UPDATED — Now loads from GitHub folders, not Imgur */
+  background: #1a1c1f url("locations/hud.png");
+
   background-size: cover;
   background-blend-mode: multiply;
   color: #e8e8e8;
