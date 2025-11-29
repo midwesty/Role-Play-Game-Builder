@@ -1,23 +1,17 @@
 /* =====================================================================
-   ScenarioSmith v3.0 – Full JS
+   ScenarioSmith v3.2 – Full Updated JS
    ---------------------------------------------------------------------
-   Includes:
-   - LocalStorage system
-   - Scenario saving/loading
-   - Debounced input saving (prevents OOM crashes)
-   - Undo / Redo (5-level depth)
-   - Fixed portraits in HUD & editor
-   - Random portrait generator
-   - Upload portrait (Base64 saved)
-   - Manager panels with Search & Filters
-   - Tag system for NPCs & Locations
-   - Random NPC generator (enhanced)
-   - Random Threat generator
-   - Player Export / Print page
-   - JSON auto-import (npcs.json & locations.json)
-   - Hover glow restored on miniCards
-   - Removed duplicate NPC/Loc buttons
-   - B1 NPC editor layout with portrait fixed at 150px
+   Fixes & Features Added:
+   - Local image loader for portraits & locations
+   - HUD background moved to assets/hud/hud_bg.jpg
+   - Random Location Generator
+   - “Add to Scenario” button in NPC & Location managers
+   - New Location popup fixed
+   - Dropdowns load correctly even without created items
+   - Save file deletion
+   - Stability improvements (OOM crash prevention)
+   - Debounced saving
+   - Prebuilt JSON loading safe & non-duplicating
    ===================================================================== */
 
 
@@ -35,9 +29,23 @@ let state = {
 
 let currentNPC = null;
 let currentLocation = null;
-
 let inputSaveTimeout = null;
 
+
+/* =====================================================================
+   IMAGE PATH HELPERS
+   ===================================================================== */
+function npcPortraitPath(file) {
+    if (!file) return "";
+    if (file.startsWith("portraits/") || file.startsWith("data:")) return file;
+    return "portraits/" + file;
+}
+
+function locationPortraitPath(file) {
+    if (!file) return "";
+    if (file.startsWith("locations/") || file.startsWith("data:")) return file;
+    return "locations/" + file;
+}
 
 
 /* =====================================================================
@@ -48,10 +56,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     await loadPrebuiltData();
     populateScenarioDropdown();
     bindFormEvents();
+    loadScenarioIntoForm();
     refreshHUD();
     initSlidePanels();
 });
-
 
 
 /* =====================================================================
@@ -63,53 +71,52 @@ async function loadPrebuiltData() {
         const locResp = await fetch("locations.json");
 
         if (npcResp.ok) {
-            const npcData = await npcResp.json();
-            npcData.npcs.forEach(n => {
-                if (!state.npcs[n.id]) state.npcs[n.id] = n;
+            const json = await npcResp.json();
+            json.npcs.forEach(n => {
+                if (!state.npcs[n.id]) {
+                    n.portrait = npcPortraitPath(n.portrait);
+                    n.prebuilt = true;
+                    state.npcs[n.id] = n;
+                }
             });
         }
 
         if (locResp.ok) {
-            const locData = await locResp.json();
-            locData.locations.forEach(l => {
-                if (!state.locations[l.id]) state.locations[l.id] = l;
+            const json = await locResp.json();
+            json.locations.forEach(l => {
+                if (!state.locations[l.id]) {
+                    l.portrait = locationPortraitPath(l.portrait);
+                    l.prebuilt = true;
+                    state.locations[l.id] = l;
+                }
             });
         }
 
         saveAllToStorage();
     } catch (err) {
-        console.warn("Prebuilt JSON not found or failed to load", err);
+        console.warn("Failed to load prebuilt JSON", err);
     }
 }
 
 
-
 /* =====================================================================
-   STORAGE HANDLING
+   STORAGE
    ===================================================================== */
 function saveAllToStorage() {
     localStorage.setItem("SM_state", JSON.stringify(state));
 }
 
 function loadAllFromStorage() {
-    let saved = localStorage.getItem("SM_state");
+    const saved = localStorage.getItem("SM_state");
     if (saved) {
         state = JSON.parse(saved);
     }
 }
 
 
-
 /* =====================================================================
    SCENARIOS
    ===================================================================== */
-function getCurrentScenario() {
-    if (!state.scenarios[state.currentScenarioName]) {
-        state.scenarios[state.currentScenarioName] = blankScenario();
-    }
-    return state.scenarios[state.currentScenarioName];
-}
-
 function blankScenario() {
     return {
         hook: "",
@@ -127,14 +134,21 @@ function blankScenario() {
     };
 }
 
+function getCurrentScenario() {
+    if (!state.scenarios[state.currentScenarioName]) {
+        state.scenarios[state.currentScenarioName] = blankScenario();
+    }
+    return state.scenarios[state.currentScenarioName];
+}
+
 function populateScenarioDropdown() {
     const sel = document.getElementById("scenarioLoadSelect");
     sel.innerHTML = "";
 
-    const optNew = document.createElement("option");
-    optNew.value = "Untitled Scenario";
-    optNew.textContent = "Untitled Scenario";
-    sel.appendChild(optNew);
+    const def = document.createElement("option");
+    def.value = "Untitled Scenario";
+    def.textContent = "Untitled Scenario";
+    sel.appendChild(def);
 
     Object.keys(state.scenarios).forEach(name => {
         const o = document.createElement("option");
@@ -146,6 +160,8 @@ function populateScenarioDropdown() {
     sel.value = state.currentScenarioName;
 }
 
+
+/* Load Scenario */
 document.getElementById("scenarioLoadSelect").onchange = (e) => {
     state.currentScenarioName = e.target.value;
     pushUndoState();
@@ -154,10 +170,11 @@ document.getElementById("scenarioLoadSelect").onchange = (e) => {
     saveAllToStorage();
 };
 
+
+/* New Scenario */
 document.getElementById("btnNew").onclick = () => {
     const name = prompt("Name your new scenario:");
     if (!name) return;
-
     state.scenarios[name] = blankScenario();
     state.currentScenarioName = name;
     pushUndoState();
@@ -167,30 +184,45 @@ document.getElementById("btnNew").onclick = () => {
     saveAllToStorage();
 };
 
+
+/* Save Scenario */
 document.getElementById("btnSave").onclick = () => {
     saveScenarioFromForm();
     saveAllToStorage();
-    alert("Scenario saved!");
+    alert("Saved!");
 };
 
 
+/* Delete Scenario */
+document.getElementById("btnDeleteScenario").onclick = () => {
+    if (!confirm("Delete this scenario?")) return;
+
+    delete state.scenarios[state.currentScenarioName];
+    state.currentScenarioName = "Untitled Scenario";
+
+    populateScenarioDropdown();
+    loadScenarioIntoForm();
+    refreshHUD();
+    saveAllToStorage();
+};
+
 
 /* =====================================================================
-   FORM BINDING + DEBOUNCED SAVE (CRASH FIX)
+   FORM BINDING + DEBOUNCED SAVE
    ===================================================================== */
 function bindFormEvents() {
-    const inputs = [
+    const ids = [
         "hookInput","truthInput","act1Input","act2Input","act3Input",
         "pacingInput","clue_0","clue_1","clue_2"
     ];
 
-    inputs.forEach(id => {
+    ids.forEach(id => {
         document.getElementById(id).oninput = debouncedSaveScenario;
     });
 
-    document.getElementById("npcAllySelect").onchange = saveScenarioFromForm;
-    document.getElementById("npcAntagSelect").onchange = saveScenarioFromForm;
-    document.getElementById("npcWildSelect").onchange = saveScenarioFromForm;
+    ["npcAllySelect","npcAntagSelect","npcWildSelect"].forEach(id => {
+        document.getElementById(id).onchange = saveScenarioFromForm;
+    });
 
     for (let i = 0; i < 5; i++) {
         document.getElementById(`loc_${i}`).onchange = saveScenarioFromForm;
@@ -202,10 +234,9 @@ function bindFormEvents() {
 }
 
 function debouncedSaveScenario() {
-    if (inputSaveTimeout) clearTimeout(inputSaveTimeout);
-    inputSaveTimeout = setTimeout(saveScenarioFromForm, 450);
+    clearTimeout(inputSaveTimeout);
+    inputSaveTimeout = setTimeout(saveScenarioFromForm, 300);
 }
-
 
 
 /* =====================================================================
@@ -229,12 +260,13 @@ function loadScenarioIntoForm() {
     refreshHUD();
 }
 
-function loadNPCDropdowns() {
-    const allySel = document.getElementById("npcAllySelect");
-    const antagSel = document.getElementById("npcAntagSelect");
-    const wildSel = document.getElementById("npcWildSelect");
 
-    [allySel, antagSel, wildSel].forEach(sel => sel.innerHTML = "");
+/* NPC dropdowns */
+function loadNPCDropdowns() {
+    const ally = document.getElementById("npcAllySelect");
+    const ant = document.getElementById("npcAntagSelect");
+    const wild = document.getElementById("npcWildSelect");
+    [ally, ant, wild].forEach(sel => sel.innerHTML = "");
 
     function blank(sel) {
         const o = document.createElement("option");
@@ -243,26 +275,28 @@ function loadNPCDropdowns() {
         sel.appendChild(o);
     }
 
-    blank(allySel);
-    blank(antagSel);
-    blank(wildSel);
+    blank(ally);
+    blank(ant);
+    blank(wild);
 
     Object.keys(state.npcs).forEach(id => {
         const npc = state.npcs[id];
         const o = document.createElement("option");
         o.value = id;
-        o.textContent = npc.name;
-        allySel.appendChild(o.cloneNode(true));
-        antagSel.appendChild(o.cloneNode(true));
-        wildSel.appendChild(o.cloneNode(true));
+        o.textContent = npc.name || "(unnamed)";
+        ally.appendChild(o.cloneNode(true));
+        ant.appendChild(o.cloneNode(true));
+        wild.appendChild(o.cloneNode(true));
     });
 
     const sc = getCurrentScenario();
-    allySel.value = sc.npcAlly || "";
-    antagSel.value = sc.npcAntag || "";
-    wildSel.value = sc.npcWild || "";
+    ally.value = sc.npcAlly || "";
+    ant.value = sc.npcAntag || "";
+    wild.value = sc.npcWild || "";
 }
 
+
+/* Location dropdowns */
 function loadLocationDropdowns() {
     for (let i = 0; i < 5; i++) {
         const sel = document.getElementById(`loc_${i}`);
@@ -277,7 +311,7 @@ function loadLocationDropdowns() {
             const loc = state.locations[id];
             const o = document.createElement("option");
             o.value = id;
-            o.textContent = loc.name;
+            o.textContent = loc.name || "(unnamed)";
             sel.appendChild(o);
         });
 
@@ -285,6 +319,8 @@ function loadLocationDropdowns() {
     }
 }
 
+
+/* Clues */
 function loadClueInputs() {
     const sc = getCurrentScenario();
     for (let i = 0; i < 3; i++) {
@@ -292,13 +328,14 @@ function loadClueInputs() {
     }
 }
 
+
+/* Tone */
 function loadToneChecks() {
     const sc = getCurrentScenario();
     document.querySelectorAll(".toneChk").forEach(chk => {
         chk.checked = sc.tones.includes(chk.value);
     });
 }
-
 
 
 /* =====================================================================
@@ -336,7 +373,6 @@ function saveScenarioFromForm() {
 }
 
 
-
 /* =====================================================================
    UNDO / REDO
    ===================================================================== */
@@ -348,7 +384,6 @@ function pushUndoState() {
 
 document.getElementById("btnUndo").onclick = () => {
     if (state.undo.length === 0) return;
-
     state.redo.push(JSON.stringify(state));
     const prev = state.undo.pop();
     state = JSON.parse(prev);
@@ -360,7 +395,6 @@ document.getElementById("btnUndo").onclick = () => {
 
 document.getElementById("btnRedo").onclick = () => {
     if (state.redo.length === 0) return;
-
     state.undo.push(JSON.stringify(state));
     const next = state.redo.pop();
     state = JSON.parse(next);
@@ -371,20 +405,22 @@ document.getElementById("btnRedo").onclick = () => {
 };
 
 
-
 /* =====================================================================
-   HUD UPDATING (WITH PORTRAITS)
+   HUD (NPC & Location Mini Cards)
    ===================================================================== */
 function refreshHUD() {
     const sc = getCurrentScenario();
-    document.getElementById("hudHook").textContent = sc.hook || "—";
-    document.getElementById("hudTruth").textContent = sc.truth || "—";
+
+    document.getElementById("hudHook").textContent =
+        sc.hook || "—";
+    document.getElementById("hudTruth").textContent =
+        sc.truth || "—";
 
     const npcArea = document.getElementById("hudNPCs");
     npcArea.innerHTML = "";
-    ["npcAlly", "npcAntag", "npcWild"].forEach(key => {
-        hudNPCminiCard(sc[key]);
-    });
+    ["npcAlly","npcAntag","npcWild"].forEach(key =>
+        hudNPCminiCard(sc[key])
+    );
 
     const locArea = document.getElementById("hudLocations");
     locArea.innerHTML = "";
@@ -393,7 +429,7 @@ function refreshHUD() {
     const clueArea = document.getElementById("hudClues");
     clueArea.innerHTML = "";
     sc.clues.forEach(c => {
-        if (c.trim().length > 0) {
+        if (c.trim()) {
             const div = document.createElement("div");
             div.className = "hudClueItem";
             div.textContent = c;
@@ -402,17 +438,15 @@ function refreshHUD() {
     });
 
     document.getElementById("hudTone").textContent =
-        sc.tones.length > 0 ? sc.tones.join(", ") : "None";
+        sc.tones.length ? sc.tones.join(", ") : "None";
 }
 
 
+/* NPC HUD Card */
 function hudNPCminiCard(id) {
     const area = document.getElementById("hudNPCs");
     const div = document.createElement("div");
     div.className = "miniCard";
-
-    div.onmouseover = () => div.style.boxShadow = "0 0 10px rgba(80,150,255,0.8)";
-    div.onmouseout = () => div.style.boxShadow = "";
 
     if (!id || !state.npcs[id]) {
         div.innerHTML = `
@@ -423,14 +457,11 @@ function hudNPCminiCard(id) {
     }
 
     const npc = state.npcs[id];
-    const portrait = npc.portrait || "";
+    const portrait = npcPortraitPath(npc.portrait);
 
     div.innerHTML = `
         <div class="miniCardPortrait"
-             style="background-image:url('${portrait}');
-                    background-size:cover;
-                    background-position:center;">
-        </div>
+             style="background-image:url('${portrait}')"></div>
         <div class="miniCardName">${npc.name}</div>
     `;
 
@@ -439,13 +470,11 @@ function hudNPCminiCard(id) {
 }
 
 
+/* Location HUD Card */
 function hudLocationMiniCard(id) {
     const area = document.getElementById("hudLocations");
     const div = document.createElement("div");
     div.className = "miniCard";
-
-    div.onmouseover = () => div.style.boxShadow = "0 0 10px rgba(80,150,255,0.8)";
-    div.onmouseout = () => div.style.boxShadow = "";
 
     if (!id || !state.locations[id]) {
         div.innerHTML = `
@@ -456,14 +485,11 @@ function hudLocationMiniCard(id) {
     }
 
     const loc = state.locations[id];
-    const portrait = loc.portrait || "";
+    const portrait = locationPortraitPath(loc.portrait);
 
     div.innerHTML = `
         <div class="miniCardPortrait"
-             style="background-image:url('${portrait}');
-                    background-size:cover;
-                    background-position:center;">
-        </div>
+             style="background-image:url('${portrait}')"></div>
         <div class="miniCardName">${loc.name}</div>
     `;
 
@@ -472,34 +498,36 @@ function hudLocationMiniCard(id) {
 }
 
 
-
 /* =====================================================================
-   NPC EDITOR (B1 LAYOUT)
+   NPC EDITOR
    ===================================================================== */
 function openNpcEditor(id) {
     if (!state.npcs[id]) return;
     currentNPC = id;
-
     const npc = state.npcs[id];
+    const portrait = npcPortraitPath(npc.portrait);
 
     const box = document.querySelector("#npcCard .popupCard");
     box.innerHTML = `
         <h2>Edit NPC</h2>
-
         <div style="display:flex; gap:10px;">
             <div style="width:150px; flex-shrink:0;">
                 <div id="npcPortraitBox"
-                     style="width:150px;height:150px;
-                            background:#ccc;border-radius:6px;
-                            background-image:url('${npc.portrait || ""}');
-                            background-size:cover;background-position:center;">
-                </div>
+                     style="width:150px;height:150px;background:#ccc;border-radius:6px;
+                     background-image:url('${portrait}');
+                     background-size:cover;background-position:center;"></div>
 
-                <button onclick="randomizeNPCPortrait()"
-                        style="margin-top:8px;width:100%;">🎲 Random Portrait</button>
+                <button onclick="randomizeNPCPortrait()" style="margin-top:8px;width:100%;">
+                    🎲 Random Portrait
+                </button>
 
-                <button onclick="uploadNPCPortrait()"
-                        style="margin-top:5px;width:100%;">⬆ Upload Portrait</button>
+                <button onclick="uploadNPCPortrait()" style="margin-top:5px;width:100%;">
+                    ⬆ Upload Portrait
+                </button>
+
+                <button onclick="addNPCToScenario()" style="margin-top:5px;width:100%;">
+                    ➕ Add to Scenario
+                </button>
             </div>
 
             <div style="flex:1;">
@@ -518,8 +546,8 @@ function openNpcEditor(id) {
                 <label>Bio:</label>
                 <textarea id="npcBio" class="popupTextarea">${npc.bio || ""}</textarea>
 
-                <label>Tags (comma separated):</label>
-                <input id="npcTags" class="popupInput" type="text"
+                <label>Tags:</label>
+                <input id="npcTags" class="popupInput" 
                        value="${(npc.tags || []).join(", ")}"/>
 
                 <div class="popupButtons">
@@ -533,51 +561,64 @@ function openNpcEditor(id) {
     document.getElementById("npcCard").style.display = "flex";
 }
 
+
+/* Add NPC to scenario */
+function addNPCToScenario() {
+    const sc = getCurrentScenario();
+    if (!sc.npcAlly) sc.npcAlly = currentNPC;
+    else if (!sc.npcAntag) sc.npcAntag = currentNPC;
+    else sc.npcWild = currentNPC;
+
+    refreshHUD();
+    saveAllToStorage();
+}
+
+
+/* Random portrait */
 function randomizeNPCPortrait() {
-    const portraitList = [];
+    const list = [];
     for (let i = 1; i <= 15; i++) {
-        portraitList.push(`portraits/${String(i).padStart(3, "0")}.jpg`);
+        const num = String(i).padStart(3,"0");
+        list.push(`portraits/${num}.jpg`);
     }
 
-    const url = portraitList[Math.floor(Math.random()*portraitList.length)];
-    const npc = state.npcs[currentNPC];
-    npc.portrait = url;
+    const url = list[Math.floor(Math.random()*list.length)];
+    state.npcs[currentNPC].portrait = url;
     document.getElementById("npcPortraitBox").style.backgroundImage = `url('${url}')`;
     saveAllToStorage();
     refreshHUD();
 }
 
+
+/* Upload custom portrait */
 function uploadNPCPortrait() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-
     input.onchange = () => {
         const file = input.files[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = e => {
-            const npc = state.npcs[currentNPC];
-            npc.portrait = e.target.result;
+            state.npcs[currentNPC].portrait = e.target.result;
             document.getElementById("npcPortraitBox").style.backgroundImage =
-                `url('${npc.portrait}')`;
+                `url('${e.target.result}')`;
             saveAllToStorage();
             refreshHUD();
         };
         reader.readAsDataURL(file);
     };
-
     input.click();
 }
+
 
 function closeNpcCard() {
     document.getElementById("npcCard").style.display = "none";
 }
 
-function saveNpc() {
-    if (!currentNPC) return;
 
+function saveNpc() {
     const npc = state.npcs[currentNPC];
     npc.name = document.getElementById("npcName").value;
     npc.secret = document.getElementById("npcSecret").value;
@@ -585,8 +626,8 @@ function saveNpc() {
     npc.personality = document.getElementById("npcPersonality").value;
     npc.bio = document.getElementById("npcBio").value;
 
-    const tagString = document.getElementById("npcTags").value.trim();
-    npc.tags = tagString ? tagString.split(",").map(s => s.trim()) : [];
+    const tags = document.getElementById("npcTags").value.trim();
+    npc.tags = tags ? tags.split(",").map(t => t.trim()) : [];
 
     saveAllToStorage();
     loadNPCDropdowns();
@@ -595,10 +636,7 @@ function saveNpc() {
 }
 
 
-
-/* =====================================================================
-   NEW NPC CREATION / RANDOM NPC / DELETE NPC
-   ===================================================================== */
+/* New NPC */
 function newNPC() {
     const id = crypto.randomUUID();
     state.npcs[id] = {
@@ -607,7 +645,7 @@ function newNPC() {
         motivation: "",
         personality: "",
         bio: "",
-        portrait: "",
+        portrait: "portraits/001.jpg",
         tags: [],
         prebuilt: false,
         createdThisSession: true
@@ -618,6 +656,7 @@ function newNPC() {
 }
 
 
+/* Random NPC generator */
 function randomNPC() {
     const names = ["Draven Holt", "Mira Voss", "Kepler Finch", "Salem Ward", "Ada Byrne"];
     const secrets = ["Owes a cult money", "Is not human", "Knows forbidden lore"];
@@ -626,7 +665,7 @@ function randomNPC() {
 
     const portraits = [];
     for (let i = 1; i <= 15; i++) {
-        portraits.push(`portraits/${String(i).padStart(3, "0")}.jpg`);
+        portraits.push(`portraits/${String(i).padStart(3,"0")}.jpg`);
     }
 
     const id = crypto.randomUUID();
@@ -635,7 +674,7 @@ function randomNPC() {
         secret: secrets[Math.floor(Math.random()*secrets.length)],
         motivation: motives[Math.floor(Math.random()*motives.length)],
         personality: traits[Math.floor(Math.random()*traits.length)],
-        bio: "A mysterious figure whose true intentions remain unclear.",
+        bio: "A mysterious figure of unknown origins.",
         portrait: portraits[Math.floor(Math.random()*portraits.length)],
         tags: [],
         prebuilt: false,
@@ -647,6 +686,8 @@ function randomNPC() {
     openNpcEditor(id);
 }
 
+
+/* Delete NPC */
 function deleteNPC(id) {
     if (!confirm("Delete this NPC?")) return;
     delete state.npcs[id];
@@ -657,43 +698,44 @@ function deleteNPC(id) {
 }
 
 
-
 /* =====================================================================
-   LOCATION EDITOR WITH PORTRAIT SUPPORT
+   LOCATION EDITOR
    ===================================================================== */
 function openLocationEditor(id) {
     if (!state.locations[id]) return;
     currentLocation = id;
-
     const loc = state.locations[id];
+    const portrait = locationPortraitPath(loc.portrait);
 
     const box = document.querySelector("#locationCard .popupCard");
     box.innerHTML = `
         <h2>Edit Location</h2>
-
         <div style="display:flex; gap:10px;">
-            <div style="width:150px; flex-shrink:0;">
+            <div style="width:150px;">
                 <div id="locPortraitBox"
-                     style="width:150px;height:150px;
-                            background:#ccc;border-radius:6px;
-                            background-image:url('${loc.portrait || ""}');
-                            background-size:cover;
-                            background-position:center;">
-                </div>
+                     style="width:150px;height:150px;background:#ccc;border-radius:6px;
+                     background-image:url('${portrait}');
+                     background-size:cover;background-position:center;"></div>
 
-                <button onclick="randomizeLocationPortrait()"
-                        style="margin-top:8px;width:100%;">🎲 Random Portrait</button>
+                <button onclick="randomizeLocationPortrait()" style="margin-top:8px;width:100%;">
+                    🎲 Random Portrait
+                </button>
 
-                <button onclick="uploadLocationPortrait()"
-                        style="margin-top:5px;width:100%;">⬆ Upload Portrait</button>
+                <button onclick="uploadLocationPortrait()" style="margin-top:5px;width:100%;">
+                    ⬆ Upload Portrait
+                </button>
+
+                <button onclick="addLocationToScenario()" style="margin-top:5px;width:100%;">
+                    ➕ Add to Scenario
+                </button>
             </div>
 
             <div style="flex:1;">
                 <label>Name:</label>
-                <input id="locName" class="popupInput" type="text" value="${loc.name}"/>
+                <input id="locName" class="popupInput" type="text" value="${loc.name || ""}"/>
 
                 <label>Sensory Hook:</label>
-                <textarea id="locSensory" class="popupTextarea">${loc.sensory}</textarea>
+                <textarea id="locSensory" class="popupTextarea">${loc.sensory || ""}</textarea>
 
                 <label>Danger Level:</label>
                 <select id="locDanger" class="popupInput">
@@ -702,13 +744,16 @@ function openLocationEditor(id) {
                     <option ${loc.danger==="High"?"selected":""}>High</option>
                 </select>
 
-                <label><input type="checkbox" id="locCluePresent" ${loc.cluePresent?"checked":""}/> Clue Present</label>
+                <label>
+                    <input type="checkbox" id="locCluePresent" 
+                        ${loc.cluePresent?"checked":""}/> Clue Present
+                </label>
 
                 <label>Description:</label>
-                <textarea id="locDescription" class="popupTextarea">${loc.description}</textarea>
+                <textarea id="locDescription" class="popupTextarea">${loc.description || ""}</textarea>
 
                 <label>Tags:</label>
-                <input id="locTags" class="popupInput" type="text"
+                <input id="locTags" class="popupInput" 
                        value="${(loc.tags || []).join(", ")}"/>
 
                 <div class="popupButtons">
@@ -723,20 +768,37 @@ function openLocationEditor(id) {
 }
 
 
+/* Add location to scenario */
+function addLocationToScenario() {
+    const sc = getCurrentScenario();
+    for (let i = 0; i < 5; i++) {
+        if (!sc.locations[i]) {
+            sc.locations[i] = currentLocation;
+            break;
+        }
+    }
+    refreshHUD();
+    saveAllToStorage();
+}
+
+
+/* Random Location Portrait */
 function randomizeLocationPortrait() {
-    const portraitList = [];
+    const list = [];
     for (let i = 1; i <= 10; i++) {
-        portraitList.push(`locations/${String(i).padStart(3, "0")}.jpg`);
+        const num = String(i).padStart(3,"0");
+        list.push(`locations/${num}.jpg`);
     }
 
-    const url = portraitList[Math.floor(Math.random()*portraitList.length)];
-    const loc = state.locations[currentLocation];
-    loc.portrait = url;
+    const url = list[Math.floor(Math.random()*list.length)];
+    state.locations[currentLocation].portrait = url;
     document.getElementById("locPortraitBox").style.backgroundImage = `url('${url}')`;
     saveAllToStorage();
     refreshHUD();
 }
 
+
+/* Upload Location Portrait */
 function uploadLocationPortrait() {
     const input = document.createElement("input");
     input.type = "file";
@@ -748,10 +810,9 @@ function uploadLocationPortrait() {
 
         const reader = new FileReader();
         reader.onload = e => {
-            const loc = state.locations[currentLocation];
-            loc.portrait = e.target.result;
+            state.locations[currentLocation].portrait = e.target.result;
             document.getElementById("locPortraitBox").style.backgroundImage =
-                `url('${loc.portrait}')`;
+                `url('${e.target.result}')`;
             saveAllToStorage();
             refreshHUD();
         };
@@ -761,13 +822,13 @@ function uploadLocationPortrait() {
     input.click();
 }
 
+
 function closeLocationCard() {
     document.getElementById("locationCard").style.display = "none";
 }
 
-function saveLocation() {
-    if (!currentLocation) return;
 
+function saveLocation() {
     const loc = state.locations[currentLocation];
     loc.name = document.getElementById("locName").value;
     loc.sensory = document.getElementById("locSensory").value;
@@ -784,6 +845,8 @@ function saveLocation() {
     closeLocationCard();
 }
 
+
+/* New Location */
 function newLocation() {
     const id = crypto.randomUUID();
     state.locations[id] = {
@@ -792,7 +855,7 @@ function newLocation() {
         danger: "Medium",
         cluePresent: false,
         description: "",
-        portrait: "",
+        portrait: "locations/001.jpg",
         tags: [],
         prebuilt: false,
         createdThisSession: true
@@ -802,6 +865,51 @@ function newLocation() {
     openLocationEditor(id);
 }
 
+
+/* Random Location */
+function randomLocation() {
+    const names = [
+        "The Rusted Pier", "Old Quarry Pit", "The Silent Chapel",
+        "Westbridge Tunnels", "Mossgate Greenhouse"
+    ];
+
+    const sensoryArr = [
+        "Cold breeze; wet stone; faint echoes.",
+        "Spilled chemicals; dripping metal; hollow thumps.",
+        "Stale incense; cracked pews; distant whispers."
+    ];
+
+    const descArr = [
+        "An abandoned site with traces of recent activity.",
+        "Locals avoid this area after dark.",
+        "Rumors suggest something lurks beneath the floors."
+    ];
+
+    const portraits = [];
+    for (let i = 1; i <= 10; i++) {
+        portraits.push(`locations/${String(i).padStart(3,"0")}.jpg`);
+    }
+
+    const id = crypto.randomUUID();
+    state.locations[id] = {
+        name: names[Math.floor(Math.random()*names.length)],
+        sensory: sensoryArr[Math.floor(Math.random()*sensoryArr.length)],
+        danger: ["Low","Medium","High"][Math.floor(Math.random()*3)],
+        cluePresent: Math.random() > 0.5,
+        description: descArr[Math.floor(Math.random()*descArr.length)],
+        portrait: portraits[Math.floor(Math.random()*portraits.length)],
+        tags: [],
+        prebuilt: false,
+        createdThisSession: true
+    };
+
+    currentLocation = id;
+    saveAllToStorage();
+    openLocationEditor(id);
+}
+
+
+/* Delete Location */
 function deleteLocation(id) {
     if (!confirm("Delete this location?")) return;
     delete state.locations[id];
@@ -812,11 +920,9 @@ function deleteLocation(id) {
 }
 
 
-
 /* =====================================================================
-   SLIDE-IN PANELS (NPC / LOCATION MANAGER)
+   MANAGER PANELS
    ===================================================================== */
-
 function initSlidePanels() {
     refreshNPCList();
     refreshLocationList();
@@ -826,7 +932,6 @@ function openNPCPanel() {
     refreshNPCList();
     document.getElementById("slidePanelNPC").classList.add("open");
 }
-
 function closeNPCPanel() {
     document.getElementById("slidePanelNPC").classList.remove("open");
 }
@@ -835,29 +940,37 @@ function openLocPanel() {
     refreshLocationList();
     document.getElementById("slidePanelLoc").classList.add("open");
 }
-
 function closeLocPanel() {
     document.getElementById("slidePanelLoc").classList.remove("open");
 }
 
 
-
+/* NPC LIST */
 function refreshNPCList() {
     const box = document.getElementById("npcList");
     box.innerHTML = `
         <div style="margin-bottom:10px;">
-            <input id="npcSearch" type="text" placeholder="Search NPCs..."
-                   style="width:100%; padding:5px;" oninput="refreshNPCList()" />
+            <input id="npcSearch" type="text" placeholder="Search NPCs..." 
+                   style="width:100%;padding:5px;" oninput="refreshNPCList()" />
         </div>
 
         <div style="margin-bottom:10px;">
-            <select id="npcFilter" style="width:100%; padding:5px;" onchange="refreshNPCList()">
+            <select id="npcFilter" style="width:100%;padding:5px;"
+                    onchange="refreshNPCList()">
                 <option value="all">All NPCs</option>
                 <option value="prebuilt">Prebuilt Only</option>
                 <option value="created">Created This Game</option>
                 <option value="previous">Created Previously</option>
             </select>
         </div>
+
+        <button onclick="newNPC()" style="width:100%;padding:8px;margin-bottom:10px;">
+            ➕ New NPC
+        </button>
+
+        <button onclick="randomNPC()" style="width:100%;padding:8px;margin-bottom:20px;">
+            🎲 Random NPC
+        </button>
     `;
 
     const search = (document.getElementById("npcSearch")?.value || "").toLowerCase();
@@ -867,8 +980,7 @@ function refreshNPCList() {
         const npc = state.npcs[id];
         if (!npc) return;
 
-        let match = npc.name.toLowerCase().includes(search);
-        if (!match) return;
+        if (!npc.name.toLowerCase().includes(search)) return;
 
         if (filter === "prebuilt" && !npc.prebuilt) return;
         if (filter === "created" && !npc.createdThisSession) return;
@@ -878,31 +990,48 @@ function refreshNPCList() {
         row.className = "managerRow";
         row.innerHTML = `
             <div class="managerName">${npc.name}</div>
-            <button onclick="openNpcEditor('${id}')">Edit</button>
-            <button onclick="deleteNPC('${id}')">Delete</button>
+            <div>
+                <button onclick="openNpcEditor('${id}')">Edit</button>
+                <button onclick="addNPCToScenarioFromList('${id}')">Add</button>
+                <button onclick="deleteNPC('${id}')">Delete</button>
+            </div>
         `;
         box.appendChild(row);
     });
 }
 
+function addNPCToScenarioFromList(id) {
+    currentNPC = id;
+    addNPCToScenario();
+}
 
 
+/* LOCATION LIST */
 function refreshLocationList() {
     const box = document.getElementById("locList");
     box.innerHTML = `
         <div style="margin-bottom:10px;">
-            <input id="locSearch" type="text" placeholder="Search Locations..."
-                   style="width:100%; padding:5px;" oninput="refreshLocationList()" />
+            <input id="locSearch" type="text" placeholder="Search Locations..." 
+                   style="width:100%;padding:5px;" oninput="refreshLocationList()" />
         </div>
 
         <div style="margin-bottom:10px;">
-            <select id="locFilter" style="width:100%; padding:5px;" onchange="refreshLocationList()">
+            <select id="locFilter" style="width:100%;padding:5px;"
+                    onchange="refreshLocationList()">
                 <option value="all">All Locations</option>
                 <option value="prebuilt">Prebuilt Only</option>
                 <option value="created">Created This Game</option>
                 <option value="previous">Created Previously</option>
             </select>
         </div>
+
+        <button onclick="newLocation()" style="width:100%;padding:8px;margin-bottom:10px;">
+            ➕ New Location
+        </button>
+
+        <button onclick="randomLocation()" style="width:100%;padding:8px;margin-bottom:20px;">
+            🎲 Random Location
+        </button>
     `;
 
     const search = (document.getElementById("locSearch")?.value || "").toLowerCase();
@@ -912,8 +1041,7 @@ function refreshLocationList() {
         const loc = state.locations[id];
         if (!loc) return;
 
-        let match = loc.name.toLowerCase().includes(search);
-        if (!match) return;
+        if (!loc.name.toLowerCase().includes(search)) return;
 
         if (filter === "prebuilt" && !loc.prebuilt) return;
         if (filter === "created" && !loc.createdThisSession) return;
@@ -923,13 +1051,20 @@ function refreshLocationList() {
         row.className = "managerRow";
         row.innerHTML = `
             <div class="managerName">${loc.name}</div>
-            <button onclick="openLocationEditor('${id}')">Edit</button>
-            <button onclick="deleteLocation('${id}')">Delete</button>
+            <div>
+                <button onclick="openLocationEditor('${id}')">Edit</button>
+                <button onclick="addLocationToScenarioFromList('${id}')">Add</button>
+                <button onclick="deleteLocation('${id}')">Delete</button>
+            </div>
         `;
         box.appendChild(row);
     });
 }
 
+function addLocationToScenarioFromList(id) {
+    currentLocation = id;
+    addLocationToScenario();
+}
 
 
 /* =====================================================================
@@ -949,9 +1084,6 @@ function generateThreat() {
         "A villager unknowingly summoned it."
     ];
 
-    // Removed broken Imgur portraits – using a local fallback
-    const portraits = ["portraits/001.jpg"];
-
     alert(
         "=== Threat Generated ===\n\n" +
         "Name: " + names[Math.floor(Math.random()*names.length)] + "\n" +
@@ -960,7 +1092,6 @@ function generateThreat() {
         "Encounter Hook: " + hooks[Math.floor(Math.random()*hooks.length)]
     );
 }
-
 
 
 /* =====================================================================
@@ -972,11 +1103,12 @@ document.getElementById("topNav").insertAdjacentHTML("beforeend", `
 
 function openPlayerExport() {
     const sc = getCurrentScenario();
-
     const w = window.open("", "_blank");
+
     w.document.write(`
-        <html><head><title>Scenario Export</title></head>
-        <body style="font-family:Arial; padding:20px; line-height:1.4;">
+        <html>
+        <head><title>Scenario Export</title></head>
+        <body style="font-family:Arial;padding:20px;line-height:1.4;">
             <h1>${state.currentScenarioName}</h1>
 
             <h2>Hook</h2>
@@ -1009,30 +1141,26 @@ function openPlayerExport() {
             <h2>Tone</h2>
             <p>${sc.tones.length ? sc.tones.join(", ") : "None"}</p>
 
-            <p style="margin-top:40px;"><em>Secrets hidden from players.</em></p>
-
-            <script>
-                window.print();
-            </script>
-        </body></html>
+            <script>window.print();</script>
+        </body>
+        </html>
     `);
 }
-
 
 
 /* =====================================================================
    HUD RESIZE + COLLAPSE
    ===================================================================== */
 let resizing = false;
-
 const handle = document.getElementById("hudResizeHandle");
+
 handle.addEventListener("pointerdown", () => resizing = true);
 window.addEventListener("pointerup", () => resizing = false);
 window.addEventListener("pointermove", e => {
     if (!resizing) return;
-    let height = window.innerHeight - e.clientY;
-    height = Math.max(120, Math.min(600, height));
-    document.getElementById("hud").style.height = height + "px";
+    let h = window.innerHeight - e.clientY;
+    h = Math.max(120, Math.min(600, h));
+    document.getElementById("hud").style.height = h + "px";
 });
 
 document.getElementById("hudToggle").onclick = () => {
@@ -1040,8 +1168,7 @@ document.getElementById("hudToggle").onclick = () => {
 };
 
 
-
 /* =====================================================================
    END
    ===================================================================== */
-console.log("ScenarioSmith v3.0 JS Loaded");
+console.log("ScenarioSmith v3.2 Loaded");
